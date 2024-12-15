@@ -1,0 +1,274 @@
+-- Services and Variables
+local player = game.Players.LocalPlayer
+local userInput = game:GetService("UserInputService")
+local runService = game:GetService("RunService")
+local char = player.Character or player.CharacterAdded:Wait()
+local humanoid = char:WaitForChild("Humanoid")
+local guiVisible = true
+
+-- Create ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "FrogieGui"
+screenGui.Parent = game.CoreGui
+
+-- Main Frame
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 600, 0, 500)  -- Increased size to accommodate Executor
+mainFrame.Position = UDim2.new(0.5, -300, 0.5, -250)
+mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+mainFrame.BorderSizePixel = 0
+mainFrame.Visible = guiVisible
+mainFrame.Parent = screenGui
+
+-- UICorner for Rounded Edges
+local uiCorner = Instance.new("UICorner")
+uiCorner.CornerRadius = UDim.new(0, 10)
+uiCorner.Parent = mainFrame
+
+-- Title Bar
+local titleBar = Instance.new("TextLabel")
+titleBar.Size = UDim2.new(1, 0, 0, 30)
+titleBar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+titleBar.Text = "Frogie GUI"
+titleBar.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleBar.TextScaled = true
+titleBar.Parent = mainFrame
+
+-- Close Button (X)
+local closeButton = Instance.new("TextButton")
+closeButton.Size = UDim2.new(0, 30, 0, 30)
+closeButton.Position = UDim2.new(1, -30, 0, 0)
+closeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+closeButton.Text = "X"
+closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeButton.TextScaled = true
+closeButton.Parent = titleBar
+
+-- Tab Buttons
+local tabFrame = Instance.new("Frame")
+tabFrame.Size = UDim2.new(1, 0, 0, 30)
+tabFrame.Position = UDim2.new(0, 0, 0, 30)
+tabFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+tabFrame.BorderSizePixel = 0
+tabFrame.Parent = mainFrame
+
+-- Create Tabs (removed Settings tab)
+local tabs = {"Home", "Character", "Scripts", "Executor"}
+local tabButtons = {}
+local selectedTab = "Home"
+
+for i, tab in ipairs(tabs) do
+    local tabButton = Instance.new("TextButton")
+    tabButton.Size = UDim2.new(1 / #tabs, 0, 1, 0)
+    tabButton.Position = UDim2.new((i - 1) / #tabs, 0, 0, 0)
+    tabButton.Text = tab
+    tabButton.TextScaled = true
+    tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    tabButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    tabButton.Parent = tabFrame
+
+    tabButtons[tab] = tabButton
+end
+
+-- Content Frames
+local contentFrames = {}
+
+for _, tab in ipairs(tabs) do
+    local contentFrame = Instance.new("Frame")
+    contentFrame.Size = UDim2.new(1, 0, 1, -60)
+    contentFrame.Position = UDim2.new(0, 0, 0, 60)
+    contentFrame.BackgroundTransparency = 1
+    contentFrame.Visible = false
+    contentFrame.Parent = mainFrame
+
+    contentFrames[tab] = contentFrame
+end
+
+-- Home Tab Content
+local homeLabel = Instance.new("TextLabel")
+homeLabel.Size = UDim2.new(1, 0, 1, 0)
+homeLabel.BackgroundTransparency = 1
+homeLabel.Text = "Made by Frogie"
+homeLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+homeLabel.TextScaled = true
+homeLabel.Parent = contentFrames["Home"]
+
+-- Character Tab Content
+local walkSpeedLabel = Instance.new("TextLabel")
+walkSpeedLabel.Text = "WalkSpeed:"
+walkSpeedLabel.Size = UDim2.new(0, 100, 0, 25)
+walkSpeedLabel.Position = UDim2.new(0, 20, 0, 20)
+walkSpeedLabel.BackgroundTransparency = 1
+walkSpeedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+walkSpeedLabel.TextScaled = true
+walkSpeedLabel.Parent = contentFrames["Character"]
+
+local walkSpeedBox = Instance.new("TextBox")
+walkSpeedBox.Size = UDim2.new(0, 160, 0, 25)
+walkSpeedBox.Position = UDim2.new(0, 120, 0, 20)
+walkSpeedBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+walkSpeedBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+walkSpeedBox.PlaceholderText = "Enter WalkSpeed"
+walkSpeedBox.TextScaled = true
+walkSpeedBox.Parent = contentFrames["Character"]
+
+walkSpeedBox.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        local speed = tonumber(walkSpeedBox.Text)
+        if speed then
+            humanoid.WalkSpeed = speed
+        end
+    end
+end)
+
+local jumpPowerLabel = Instance.new("TextLabel")
+jumpPowerLabel.Text = "JumpPower:"
+jumpPowerLabel.Size = UDim2.new(0, 100, 0, 25)
+jumpPowerLabel.Position = UDim2.new(0, 20, 0, 60)
+jumpPowerLabel.BackgroundTransparency = 1
+jumpPowerLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+jumpPowerLabel.TextScaled = true
+jumpPowerLabel.Parent = contentFrames["Character"]
+
+local jumpPowerBox = Instance.new("TextBox")
+jumpPowerBox.Size = UDim2.new(0, 160, 0, 25)
+jumpPowerBox.Position = UDim2.new(0, 120, 0, 60)
+jumpPowerBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+jumpPowerBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+jumpPowerBox.PlaceholderText = "Enter JumpPower"
+jumpPowerBox.TextScaled = true
+jumpPowerBox.Parent = contentFrames["Character"]
+
+jumpPowerBox.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        local power = tonumber(jumpPowerBox.Text)
+        if power then
+            humanoid.JumpPower = power
+        end
+    end
+end)
+
+-- Scripts Tab Content (with Executor, Aimbot Script, ESP Script, and Infinite Yield Button)
+local scriptButton = Instance.new("TextButton")
+scriptButton.Size = UDim2.new(0.9, 0, 0.1, 0)
+scriptButton.Position = UDim2.new(0.05, 0, 0.1, 0)
+scriptButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+scriptButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+scriptButton.Text = "Load Aimbot Script"
+scriptButton.TextScaled = true
+scriptButton.Parent = contentFrames["Scripts"]
+
+local espButton = Instance.new("TextButton")
+espButton.Size = UDim2.new(0.9, 0, 0.1, 0)
+espButton.Position = UDim2.new(0.05, 0, 0.2, 0)
+espButton.BackgroundColor3 = Color3.fromRGB(255, 0, 255)
+espButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+espButton.Text = "Load ESP Script"
+espButton.TextScaled = true
+espButton.Parent = contentFrames["Scripts"]
+
+local infiniteYieldButton = Instance.new("TextButton")
+infiniteYieldButton.Size = UDim2.new(0.9, 0, 0.1, 0)
+infiniteYieldButton.Position = UDim2.new(0.05, 0, 0.3, 0)  -- Positioned below ESP Button
+infiniteYieldButton.BackgroundColor3 = Color3.fromRGB(0, 0, 255)
+infiniteYieldButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+infiniteYieldButton.Text = "Load Infinite Yield"
+infiniteYieldButton.TextScaled = true
+infiniteYieldButton.Parent = contentFrames["Scripts"]
+
+-- Executor Tab Content
+local executorLabel = Instance.new("TextLabel")
+executorLabel.Size = UDim2.new(0.9, 0, 0.05, 0)
+executorLabel.Position = UDim2.new(0.05, 0, 0.05, 0)
+executorLabel.BackgroundTransparency = 1
+executorLabel.Text = "Execute Custom Code:"
+executorLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+executorLabel.TextScaled = true
+executorLabel.Parent = contentFrames["Executor"]
+
+local executorBox = Instance.new("TextBox")
+executorBox.Size = UDim2.new(0.9, 0, 0.3, 0)  -- Increased size for the executor
+executorBox.Position = UDim2.new(0.05, 0, 0.15, 0)
+executorBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+executorBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+executorBox.PlaceholderText = "Enter your Lua code here"
+executorBox.TextScaled = true
+executorBox.Parent = contentFrames["Executor"]
+
+local executeButton = Instance.new("TextButton")
+executeButton.Size = UDim2.new(0.9, 0, 0.1, 0)
+executeButton.Position = UDim2.new(0.05, 0, 0.5, 0)
+executeButton.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
+executeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+executeButton.Text = "Execute Code"
+executeButton.TextScaled = true
+executeButton.Parent = contentFrames["Executor"]
+
+-- Button click to load Aimbot script
+scriptButton.MouseButton1Click:Connect(function()
+    local aimbotScript = "loadstring(game:HttpGet('https://raw.githubusercontent.com/Exunys/Aimbot-V2/main/Resources/Scripts/Aimbot%20V2%20GUI.lua'))()"
+    loadstring(aimbotScript)()
+end)
+
+-- Button click to load ESP script
+espButton.MouseButton1Click:Connect(function()
+    local espScript = "local ESPLibrary = loadstring(game:HttpGet('https://raw.githubusercontent.com/Exunys/Exunys-ESP/main/src/ESP.lua'))()"
+    loadstring(espScript)()
+end)
+
+-- Button click to load Infinite Yield script
+infiniteYieldButton.MouseButton1Click:Connect(function()
+    local infiniteYieldScript = "loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source',true))()"
+    loadstring(infiniteYieldScript)()
+end)
+
+-- Button to execute custom code from TextBox
+executeButton.MouseButton1Click:Connect(function()
+    local code = executorBox.Text
+    if code ~= "" then
+        loadstring(code)()
+    end
+end)
+
+-- Close the GUI when clicking the X button
+closeButton.MouseButton1Click:Connect(function()
+    screenGui:Destroy()
+end)
+
+-- Tab Switching
+local function switchTab(tab)
+    for t, frame in pairs(contentFrames) do
+        frame.Visible = (t == tab)
+        tabButtons[t].BackgroundColor3 = (t == tab) and Color3.fromRGB(60, 60, 60) or Color3.fromRGB(40, 40, 40)
+    end
+end
+
+for tab, button in pairs(tabButtons) do
+    button.MouseButton1Click:Connect(function()
+        switchTab(tab)
+    end)
+end
+
+-- Default Tab
+switchTab("Home")
+
+-- Open/Close with Keybind, but skip when typing in any textbox
+local typing = false
+
+userInput.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Keyboard then
+        if input.KeyCode == Enum.KeyCode.K and not typing then
+            guiVisible = not guiVisible
+            mainFrame.Visible = guiVisible
+        end
+    end
+end)
+
+-- Monitor if user is typing in the TextBox
+executorBox.Focused:Connect(function()
+    typing = true
+end)
+
+executorBox.FocusLost:Connect(function()
+    typing = false
+end)
